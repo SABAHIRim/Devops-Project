@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-const API_CHAT = "http://localhost:3000/api/chat/messages";
-const API_ME = "http://localhost:3000/auth/me";
+const API_CHAT = "/api/node/api/chat/messages";
+const API_ME = "/api/node/auth/me";
 
 export default function TeamChat() {
   const [messages, setMessages] = useState([]);

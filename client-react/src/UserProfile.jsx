@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:3000/api/users";
+const API = "/api/node/api/users";
 
 export default function UserProfile({ userToken }) {
     const [profile, setProfile] = useState(null);
@@ -17,12 +17,12 @@ export default function UserProfile({ userToken }) {
 
     const loadData = async () => {
         try {
-            const [pRes, aRes, sRes] = await Promise.all([
-                fetch(`${API}/me/profile`, { headers }),
-                fetch(`${API}/me/activity`, { headers }),
-                fetch(`${API}/me/stats`, { headers }),
-                fetch(`${API}`, { headers })
-            ]);
+            const [pRes, aRes, sRes, uRes] = await Promise.all([
+    fetch(`${API}/me/profile`, { headers }),
+    fetch(`${API}/me/activity`, { headers }),
+    fetch(`${API}/me/stats`, { headers }),
+    fetch(`${API}`, { headers })
+]);
             
             if (pRes.ok) {
                 const pData = await pRes.json();
