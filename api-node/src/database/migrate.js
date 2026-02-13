@@ -21,8 +21,9 @@ async function migrate() {
     "ALTER TABLE users ADD COLUMN bio TEXT",
     "ALTER TABLE users ADD COLUMN avatar_url TEXT",
     "ALTER TABLE users ADD COLUMN display_name TEXT",
-    "ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'dark'"
-  ];
+    "ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'dark'",
+    "ALTER TABLE users ADD COLUMN timezone TEXT DEFAULT 'UTC'" // AJOUTE CETTE LIGNE
+];
 
   for (const sql of columns) {
     try {
