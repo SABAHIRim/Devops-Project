@@ -1,37 +1,28 @@
-name: DevOps_Pipeline_CI
+name: CI DevOps PFE
 
 on:
   push:
-    branches: [ "main", "Team6/profile-features" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "Team6/profile-features", "main" ]
 
 jobs:
-  backend-tests:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Database Migration
-        run: cd api-node && node src/database/migrate.js
-
-      - name: Run Tests & Coverage
-        run: cd api-node && npm test
       - uses: actions/checkout@v4
-      - name: Setup Node
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-      - name: Install & Run Tests
-        run: |
-          cd api-node
-          npm install
-          npm test # Lance les tests automatiques et le coverage
 
-  frontend-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build React
-        run: |
-          cd client-react
-          npm install
-          npm run build # Vérifie que le build ne plante pas
+      - name: Install dependencies
+        run: make install
+
+      - name: Database migration
+        run: cd api-node && node src/database/migrate.js
+
+      - name: Run Tests & Coverage
+        run: make test
+
+      - name: Build Frontend
+        run: cd client-react && npm run build
