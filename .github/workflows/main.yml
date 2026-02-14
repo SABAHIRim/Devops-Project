@@ -10,32 +10,47 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
 
+    # ✅ DB dispo sur GitHub Actions (au lieu de dépendre de docker-up)
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install make (if needed)
+        run: sudo apt-get update && sudo apt-get install -y make
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
+          cache-dependency-path: api-node/package-lock.json
 
       - name: Install deps
         run: make install
-
-      - name: Docker up (DB + services)
-        run: make docker-up
-
-      - name: Wait for services
-        run: sleep 10
 
       - name: DB migrate
         run: cd api-node && node src/database/migrate.js
 
       - name: Tests & Coverage
         run: make test
-
-      - name: Docker down
-        if: always()
-        run: make docker-down
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -46,9 +61,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: npm
+          cache-dependency-path: client-react/package-lock.json
 
-      - name: Build React
+      - name: Install & Build React
         run: |
           cd client-react
           npm ci
           npm run build
+git add .github/workflows/main.yml
