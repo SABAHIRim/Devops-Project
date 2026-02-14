@@ -4,11 +4,11 @@
   "description": "simple api that connects to postgres",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/database/migrate.js && node src/index.js",
     "dev": "nodemon src/index.js",
     "debug": "nodemon --inspect ./src/index.js",
     "debug-docker": "nodemon --inspect=0.0.0.0:9229 ./src/index.js",
-    "test": "jest --detectOpenHandles --forceExit"
+    "test": "jest --detectOpenHandles --forceExit --coverage"
   },
   "author": "",
   "license": "ISC",

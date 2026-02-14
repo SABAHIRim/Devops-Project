@@ -64,7 +64,9 @@ export default function UserProfile({ userToken }) {
 const updatePref = async (key, value) => {
         const body = key === 'theme' ? { theme: value } : { timezone: value };
         const res = await fetch(`${API}/me/preferences`, {
-            method: "PATCH", headers, body: JSON.stringify(body)
+            method: "PATCH", 
+            headers, 
+            body: JSON.stringify(body)
         });
         if (res.ok) loadData();
     };
@@ -80,7 +82,7 @@ const updatePref = async (key, value) => {
             });
             if (res.ok) {
                 document.documentElement.setAttribute('data-theme', newTheme);
-                loadData();
+                await loadData();
             }
         } catch (e) { console.error("Erreur changement thème", e); }
     };
@@ -161,8 +163,14 @@ const updatePref = async (key, value) => {
                 <div style={styles.userList}>
                     {allUsers.map(u => (
                         <div key={u.id} style={styles.userRow}>
-                            <img src={u.avatar_url || `https://ui-avatars.com/api/?name=${u.username}`} style={styles.miniAvatar} />
-                            <span>{u.display_name || u.username}</span>
+                            <img src={u.avatar_url || `https://ui-avatars.com/api/?name=${u.username}`} style={{
+        width: "100px",      // Force une largeur fixe
+        height: "100px",     // Force une hauteur fixe
+        borderRadius: "50%", // Garde l'aspect circulaire
+        objectFit: "cover",  // Évite que l'image soit déformée
+        border: "3px solid #6c63ff"
+    }} 
+    alt="Avatar" />
                         </div>
                     ))}
                 </div>

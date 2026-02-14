@@ -1,21 +1,32 @@
-
-name: Hello World
+name: DevOps_Pipeline_CI
 
 on:
   push:
-    branches:
-      - master
-      - main
-      - "Team6/profile-features"
-      - "imaneayyadi6-patch-1"
+    branches: [ "main", "Team6/profile-features" ]
   pull_request:
-    branches:
-      - master
-      - main
-  workflow_dispatch:
+    branches: [ "main" ]
 
 jobs:
-  say-hello-inline-bash:
-    runs-on: ubuntu-24.04
+  backend-tests:
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "hello from an inline bash script in a GitHub Action Workflow!"
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install & Run Tests
+        run: |
+          cd api-node
+          npm install
+          npm test # Lance les tests automatiques et le coverage
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build React
+        run: |
+          cd client-react
+          npm install
+          npm run build # Vérifie que le build ne plante pas

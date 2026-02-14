@@ -1,126 +1,32 @@
-# ─────────────────────────────────────────────────────────────
-#  1. DEV: Mode développement (Hot reload)
-# ─────────────────────────────────────────────────────────────
-.PHONY: dev
-dev:
-	@echo "Starting full stack, using local SQLite (dev.db)"
-	@echo "   React  → http://localhost:5173"
-	@echo "   Node   → http://localhost:3000"
-	@echo "   Go     → http://localhost:8080"
-	@make -j4 run-client-react run-api-node run-api-golang run-sqlite
+# Variables
+NODE_DIR=api-node
+REACT_DIR=client-react
 
-# --- Sous-tâches pour DEV ---
+.PHONY: install test build docker-up clean help
 
-.PHONY: run-sqlite
-run-sqlite:
-	@echo "SQLite database → ./dev.db (auto-created, git-ignored)"
+init-db:
+	@echo "Initialisation de la base de données SQLite..."
+	cd api-node && node src/database/migrate.js
 
-.PHONY: run-api-node
-run-api-node:
-	@echo Starting node api
-	cd api-node && npm run dev
-
-.PHONY: run-api-golang
-run-api-golang:
-	@echo Starting golang api
-	@# Fix Windows: on active CGO avant le run
-	cd api-golang && go env -w CGO_ENABLED=1 && go run main.go
-
-.PHONY: run-client-react
-run-client-react:
-	@echo Starting react client
-	cd client-react && npm run dev
-
-
-# ─────────────────────────────────────────────────────────────
-#  2. INSTALL: Installe toutes les dépendances
-# ─────────────────────────────────────────────────────────────
-.PHONY: install
 install:
-	@echo "Installation des dépendances pour Node, React et Go..."
-	@make -j3 install-api-node install-client-react install-api-golang
-	@echo "Terminé ! Tout est installé."
+	@echo "Installation des dépendances..."
+	cd $(NODE_DIR) && npm install
+	cd $(REACT_DIR) && npm install
+	$(MAKE) init-db
 
-# --- Sous-tâches pour INSTALL ---
+test:
+	@echo "Lancement des tests..."
+	cd $(NODE_DIR) && npm test
 
-.PHONY: install-api-node
-install-api-node:
-	@echo "Installation modules Node..."
-	cd api-node && npm install
+build:
+	@echo "Compilation du projet..."
+	cd $(REACT_DIR) && npm run build
+	@echo "Build terminé avec succès."
 
-.PHONY: install-client-react
-install-client-react:
-	@echo "Installation modules React..."
-	cd client-react && npm install
+docker-up:
+	docker-compose up --build
 
-.PHONY: install-api-golang
-install-api-golang:
-	@echo "Téléchargement modules Go..."
-	cd api-golang && go mod download
-
-
-# ─────────────────────────────────────────────────────────────
-#  3. BUILD: Construit la version Production (Optimisée)
-# ─────────────────────────────────────────────────────────────
-.PHONY: build
-build: clean
-	@echo "Construction pour la Production..."
-	@make -j2 build-react build-go
-	@echo "Build terminé."
-
-# --- Sous-tâches pour BUILD ---
-
-.PHONY: build-react
-build-react:
-	@echo " [React] Construction du dossier dist..."
-	cd client-react && npm run build
-
-.PHONY: build-go
-build-go:
-	@echo " [Go] Compilation en .exe..."
-	cd api-golang && go env -w CGO_ENABLED=1 && go build -o main.exe main.go
-
-
-# ─────────────────────────────────────────────────────────────
-#  4. START: Lance la version Production
-# ─────────────────────────────────────────────────────────────
-.PHONY: start
-start:
-	@echo "Démarrage en mode PRODUCTION..."
-	@echo "   React (Preview) → http://localhost:4173"
-	@make -j3 start-react-prod start-node-prod start-go-prod
-
-# --- Sous-tâches pour START ---
-
-.PHONY: start-react-prod
-start-react-prod:
-	cd client-react && npm run preview
-
-.PHONY: start-node-prod
-start-node-prod:
-	cd api-node && node src/index.js
-
-.PHONY: start-go-prod
-start-go-prod:
-	cd api-golang && ./main.exe
-
-
-# ─────────────────────────────────────────────────────────────
-#  UTILITAIRES (Clean, Restart, Status)
-# ─────────────────────────────────────────────────────────────
-
-.PHONY: clean
 clean:
-	@echo "Nettoyage du projet..."
-	-rm -rf client-react/dist
-	-rm -f dev.db
-	-rm -f api-golang/main.exe
-	@echo "Nettoyage terminé."
-
-.PHONY: restart
-restart: clean dev
-
-.PHONY: status
-status:
-	@echo "Vérification des ports (3000, 8080, 5173)..."
-	netstat -an | findstr "3000 8080 5173"
+	@echo "Nettoyage..."
+	rm -rf $(REACT_DIR)/dist
+	docker-compose down

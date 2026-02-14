@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  backend:
+    environment:
+      - PORT=3000
+      - JWT_SECRET=ton_secret_très_secure
+      - JWT_EXPIRES_IN=24h
+    build: ./api-node
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dev.db:/app/dev.db
+
+  frontend:
+    build: ./client-react
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
