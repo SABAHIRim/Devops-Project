@@ -69,4 +69,3 @@ jobs:
           cd client-react
           npm ci
           npm run build
-git add .github/workflows/main.yml
