@@ -2,10 +2,42 @@ name: CI DevOps PFE
 
 on:
   push:
-    branches: [ "Team6/profile-features", "main" ]
+    branches: [ "main", "Team6/profile-features" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  backend-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install deps
+        run: make install
+
+      - name: Docker up (DB + services)
+        run: make docker-up
+
+      - name: Wait for services
+        run: sleep 10
+
+      - name: DB migrate
+        run: cd api-node && node src/database/migrate.js
+
+      - name: Tests & Coverage
+        run: make test
+
+      - name: Docker down
+        if: always()
+        run: make docker-down
+
+  frontend-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,14 +47,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: make install
-
-      - name: Database migration
-        run: cd api-node && node src/database/migrate.js
-
-      - name: Run Tests & Coverage
-        run: make test
-
-      - name: Build Frontend
-        run: cd client-react && npm run build
+      - name: Build React
+        run: |
+          cd client-react
+          npm ci
+          npm run build
