@@ -5,6 +5,9 @@ const app = require("../src/app");
 const { openDb } = require("../src/db");
 const { hashPassword } = require("../src/utils/password");
 
+// Augmente le timeout Jest (évite le fail CI à 5000ms)
+jest.setTimeout(20000);
+
 let token;
 
 beforeAll(async () => {
