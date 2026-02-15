@@ -1,32 +1,51 @@
-# Variables
-NODE_DIR=api-node
-REACT_DIR=client-react
+# Makefile (Windows + GitHub Actions friendly)
+# - install deps (backend + frontend)
+# - init/migrate SQLite DB
+# - run tests + coverage
+# - build React frontend
+# - docker up/down (works even if docker path has spaces)
+# - ci target = full pipeline locally (and can be used in GitHub Actions)
 
-.PHONY: install test build docker-up clean help
+SHELL := /bin/sh
 
-init-db:
-	@echo "Initialisation de la base de données SQLite..."
-	cd api-node && node src/database/migrate.js
+.PHONY: install init-db migrate test build-frontend docker-up docker-down ci
+
+# --- Paths ---
+API_DIR := api-node
+FRONT_DIR := client-react
+
+# --- Docker executable (Windows + Linux) ---
+# If docker is in PATH, this will work.
+# If make can't find docker on Windows, set DOCKER_EXE to the full path of docker.exe.
+DOCKER_EXE ?= docker
 
 install:
 	@echo "Installation des dépendances..."
-	cd $(NODE_DIR) && npm install
-	cd $(REACT_DIR) && npm install
-	$(MAKE) init-db
+	cd $(API_DIR) && npm install
+	cd $(FRONT_DIR) && npm install
+
+init-db:
+	@echo "Initialisation de la base de données SQLite..."
+	cd $(API_DIR) && node src/database/migrate.js
+
+migrate: init-db
 
 test:
 	@echo "Lancement des tests..."
-	cd $(NODE_DIR) && npm test
+	cd $(API_DIR) && npm test
 
-build:
-	@echo "Compilation du projet..."
-	cd $(REACT_DIR) && npm run build
-	@echo "Build terminé avec succès."
+build-frontend:
+	@echo "Build Frontend..."
+	cd $(FRONT_DIR) && npm run build
 
 docker-up:
-	docker-compose up --build
+	@echo "Docker up..."
+	"$(DOCKER_EXE)" compose up --build -d
 
-clean:
-	@echo "Nettoyage..."
-	rm -rf $(REACT_DIR)/dist
-	docker-compose down
+docker-down:
+	@echo "Docker down..."
+	"$(DOCKER_EXE)" compose down -v
+
+# Full local pipeline (same idea as CI)
+ci: install init-db test build-frontend
+	@echo " CI local terminé avec succès"
