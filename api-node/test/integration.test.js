@@ -146,12 +146,12 @@ describe("Integration tests - Profile feature", () => {
   // ============================================================
   // PATCH /profile/me/preferences
   // ============================================================
-  test("PATCH /profile/me/preferences sans token → 201", async () => {
+  test("PATCH /profile/me/preferences sans token → 401", async () => {
     const res = await request(app)
       .patch(`${BASE}/me/preferences`)
       .send({ theme: "light" });
 
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(401);
   });
 
   test("PATCH /profile/me/preferences avec token → 200", async () => {
