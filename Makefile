@@ -5,6 +5,7 @@
 # - build React frontend
 # - docker up/down (works even if docker path has spaces)
 # - ci target = full pipeline locally (and can be used in GitHub Actions)
+DOCKER_EXE ?= "C:\Program Files\Docker\Docker\resources\bin\docker.exe"
 
 SHELL := /bin/sh
 
@@ -49,3 +50,4 @@ docker-down:
 # Full local pipeline (same idea as CI)
 ci: install init-db test build-frontend
 	@echo " CI local terminé avec succès"
+

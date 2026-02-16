@@ -10,7 +10,7 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
 
-    # ✅ DB dispo sur GitHub Actions (au lieu de dépendre de docker-up)
+    # DB dispo sur GitHub Actions (au lieu de dépendre de docker-up)
     services:
       postgres:
         image: postgres:15
